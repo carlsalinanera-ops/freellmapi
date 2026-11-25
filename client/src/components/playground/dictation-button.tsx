@@ -3,6 +3,7 @@ import { Loader2, Mic, Square } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useI18n } from '@/i18n'
 import { toast } from '@/lib/toast'
+import { API_BASE } from '@/lib/api'
 import { pickRecordingMimeType, recordingFilename } from '@/lib/transcription'
 
 // The mic in the composer. One click records, the next stops and sends the
@@ -92,8 +93,7 @@ export function DictationButton({ onUnavailable, model, apiKey, disabled, onText
       form.append('response_format', 'json')
       const headers: Record<string, string> = {}
       if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`
-      const base = import.meta.env.BASE_URL.replace(/\/$/, '')
-      const res = await fetch(`${base}/v1/audio/transcriptions`, { method: 'POST', headers, body: form })
+      const res = await fetch(`${API_BASE}/v1/audio/transcriptions`, { method: 'POST', headers, body: form })
       if (!res.ok) {
         const body = await res.json().catch(() => null) as { error?: { message?: string } } | null
         throw new Error(body?.error?.message || `HTTP ${res.status}`)

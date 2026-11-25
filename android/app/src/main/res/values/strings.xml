@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">FreeLLMAPI</string>
+    <string name="title_activity_main">FreeLLMAPI</string>
+    <string name="package_name">com.freellmapi.app</string>
+    <string name="custom_url_scheme">com.freellmapi.app</string>
+</resources>

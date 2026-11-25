@@ -29,6 +29,7 @@
     "db:migration:create": "npm run db:migration:create -w server"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.6.2",
     "concurrently": "^9.1.2",
     "jsdom": "^27.4.0"
   },

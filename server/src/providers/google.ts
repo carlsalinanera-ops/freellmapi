@@ -332,7 +332,7 @@ function toGeminiToolConfig(toolChoice?: ChatToolChoice): { functionCallingConfi
   };
 }
 
-const MAX_IMAGE_BYTES = 8 * 1024 * 1024; // 8 MB cap on fetched/inlined images
+const MAX_IMAGE_BYTES = 16 * 1024 * 1024; // 16 MB cap on fetched/inlined images
 
 // Pull the URL out of an OpenAI image content block. Accepts both the object
 // form `{ image_url: { url } }` and the shorthand `{ image_url: '...' }`.

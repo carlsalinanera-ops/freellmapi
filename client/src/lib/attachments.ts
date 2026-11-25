@@ -23,7 +23,7 @@ export const MAX_TOTAL_IMAGE_BYTES = 3_000_000
 /** Cap for one text-like file, before inlining it into the prompt. */
 export const MAX_TEXT_BYTES = 128_000
 /** Attachments allowed on a single message. */
-export const MAX_ATTACHMENTS = 5
+export const MAX_ATTACHMENTS = 20
 
 export const IMAGE_MIME_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif']
 export const TEXT_EXTENSIONS = ['txt', 'md', 'markdown', 'csv', 'tsv', 'json', 'log']
