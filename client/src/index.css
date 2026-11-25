@@ -231,3 +231,68 @@ button, input, textarea, select {
     overflow-wrap: anywhere;
   }
 }
+
+
+/* FreeLLMAPI mobile-first redesign v2 */
+:root {
+  color-scheme: light;
+}
+.dark {
+  color-scheme: dark;
+  --background: oklch(0.115 0.018 260);
+  --foreground: oklch(0.94 0.012 250);
+  --card: oklch(0.16 0.022 260);
+  --card-foreground: oklch(0.94 0.012 250);
+  --popover: oklch(0.17 0.024 260);
+  --popover-foreground: oklch(0.94 0.012 250);
+  --sidebar: oklch(0.135 0.02 260);
+  --sidebar-foreground: oklch(0.91 0.015 250);
+  --muted: oklch(0.205 0.025 260);
+  --muted-foreground: oklch(0.69 0.025 255);
+  --accent: oklch(0.235 0.04 255);
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 11%);
+  --ring: oklch(0.72 0.13 190);
+}
+html, body, #root {
+  min-height: 100%;
+}
+body {
+  -webkit-tap-highlight-color: transparent;
+  text-rendering: optimizeLegibility;
+}
+button, input, textarea, select {
+  touch-action: manipulation;
+}
+.dark :is(button, input, textarea, select) {
+  color-scheme: dark;
+}
+.dark button {
+  transition: background-color 150ms ease, border-color 150ms ease,
+              color 150ms ease, opacity 150ms ease;
+}
+.dark :is(input, textarea, select):focus-visible {
+  outline: 2px solid oklch(0.72 0.13 190 / 75%);
+  outline-offset: 2px;
+}
+.dark [class~="max-w-3xl"] {
+  width: 100%;
+}
+.dark [class~="border-e"] {
+  border-color: oklch(1 0 0 / 8%);
+}
+.dark [class~="border-t"] {
+  border-color: oklch(1 0 0 / 8%);
+}
+.dark ::selection {
+  background: oklch(0.68 0.12 190 / 35%);
+}
+@media (max-width: 640px) {
+  #root {
+    overflow-wrap: anywhere;
+  }
+  .dark [class~="max-w-3xl"] {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+}
