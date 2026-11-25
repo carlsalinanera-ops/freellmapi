@@ -1,4 +1,4 @@
-export const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? import.meta.env.BASE_URL).replace(/\/$/, '');
+export const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? import.meta.env.BASE_URL).replace(/\/$/, "");
 const TOKEN_KEY = 'freellmapi_dashboard_token';
 
 // Dashboard session token (#35). Stored in localStorage; sent as a Bearer on
@@ -82,7 +82,15 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
 }
 
 export async function logout(): Promise<void> {
-  try { await apiFetch('/api/auth/logout', { method: 'POST' }); } catch { /* ignore */ }
+  let endSessionUrl: string | undefined;
+  try {
+    const res = await apiFetch<{ success?: boolean; endSessionUrl?: string }>('/api/auth/logout', { method: 'POST' });
+    endSessionUrl = res?.endSessionUrl;
+  } catch { /* ignore */ }
   clearToken();
+  if (endSessionUrl) {
+    window.location.assign(endSessionUrl);
+    return;
+  }
   window.dispatchEvent(new CustomEvent(UNAUTHORIZED_EVENT));
 }

@@ -15,6 +15,7 @@ import { runImageGeneration, runVideoGeneration, runSpeech, runTranscription, Me
 import multer from 'multer';
 import { getDb } from '../db/index.js';
 import { resolveAuth, prependSystemPrompt, type ResolvedAuth } from '../lib/system-prompt.js';
+import { maybeInjectSystemDate } from '../lib/system-date.js';
 import { contentToString, estimateInputTokens, messageHasImage, normalizeOutboundContent, sanitizeResponse } from '../lib/content.js';
 import { routeOutputBudget } from '../lib/output-cap.js';
 import { resolveTaskType } from '../lib/task-type.js';
@@ -1569,7 +1570,9 @@ proxyRouter.post('/completions', async (req: Request, res: Response) => {
   // Fallback-v2 hedging: the loop aborts this controller (via abortInFlight)
   // when the wall-clock retry budget expires mid-attempt, canceling the
   // in-flight upstream instead of waiting for a stalled attempt to time out.
-  const hedgeAbort = new AbortController();
+  // `let`: abortInFlight aborts only the in-flight attempt and replaces the
+  // controller, so a silent-window failover gets a fresh signal (#1960).
+  let hedgeAbort = new AbortController();
   res.on('close', () => {
     if (!res.writableEnded) {
       clientGone = true;
@@ -1586,7 +1589,8 @@ proxyRouter.post('/completions', async (req: Request, res: Response) => {
     attemptLog,
     logIdentity: { surface: 'legacy completions', requestId: requestGroupId, requestedModel: requestedModelLabel },
     clientGone: () => clientGone,
-    abortInFlight: () => hedgeAbort.abort(newHedgeAbortError()),
+    abortInFlight: () => { hedgeAbort.abort(newHedgeAbortError()); hedgeAbort = new AbortController(); },
+    streaming: stream === true,
     route: () => {
       // #507: see inbound-chat.ts — inflate the routing estimate from any
       // provider-reported REQUESTED size latched onto state so the existing
@@ -2063,6 +2067,10 @@ proxyRouter.post('/chat/completions', async (req: Request, res: Response) => {
   });
   messages = compressionResult.messages;
   res.setHeader('X-FreeLLM-Compress', formatCompressionHeader(compressionResult));
+
+  // Opt-in system date (#1931): injected after compression (never compressed
+  // away) and right behind any client-profile enforced system prompt.
+  messages = maybeInjectSystemDate(messages, { tools });
 
   // Server-enforced system prompt (#411): injected AFTER compression so it is
   // never compressed away, and FIRST in the list so a caller-supplied system
@@ -2563,7 +2571,9 @@ proxyRouter.post('/chat/completions', async (req: Request, res: Response) => {
   // Fallback-v2 hedging: the loop aborts this controller (via abortInFlight)
   // when the wall-clock retry budget expires mid-attempt, canceling the
   // in-flight upstream instead of waiting for a stalled attempt to time out.
-  const hedgeAbort = new AbortController();
+  // `let`: abortInFlight aborts only the in-flight attempt and replaces the
+  // controller, so a silent-window failover gets a fresh signal (#1960).
+  let hedgeAbort = new AbortController();
 
   // Decision routing (#1354): with the 'decision' strategy on, a decision
   // model picks which preset (Smartest / Fastest / Balanced / Most reliable)
@@ -2578,7 +2588,8 @@ proxyRouter.post('/chat/completions', async (req: Request, res: Response) => {
     attemptLog,
     logIdentity: { surface: 'chat completions', requestId: requestGroupId, requestedModel: requestedModelLabel },
     clientGone: () => clientGone,
-    abortInFlight: () => hedgeAbort.abort(newHedgeAbortError()),
+    abortInFlight: () => { hedgeAbort.abort(newHedgeAbortError()); hedgeAbort = new AbortController(); },
+    streaming: stream === true,
     route: () => {
       // When a handoff could fire this turn, pad the token estimate so the router's
       // context-window and TPM checks account for the extra system message overhead.
